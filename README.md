@@ -58,5 +58,4 @@ Backend for AR-Learn, providing API endpoints and integrations with Neo4j and Op
 <a href="https://github.com/kitejordan/AR-Learn-Backend/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=kitejordan/AR-Learn-Backend" />
 </a>
-<div>git 
-
+<div>
