@@ -1,0 +1,51 @@
+# --- Environment & Secrets ---
+# Keep sensitive information out of version control.
+.env
+*.log
+secrets.toml
+
+# --- Virtual Environment ---
+# The venv directory should not be tracked.
+.venv/
+
+# --- Python Dependencies & Artifacts ---
+# Byte-compiled / optimized files
+_pycache_/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Test & Coverage Reports
+.coverage
+.coverage.*
+.pytest_cache/
+htmlcov/
+
+# Type Checker Caches
+.mypy_cache/
+
+# --- Project-Specific ---
+# Ignore generated analytics, plots, and stats.
+cache/
+
+# --- IDEs & Editors ---
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.history/
+
+# PyCharm
+.idea/
+
+# --- OS Specific ---
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
