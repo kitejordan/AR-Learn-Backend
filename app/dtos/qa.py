@@ -1,10 +1,11 @@
 from pydantic import BaseModel
 
+# --- Existing DTOs ---
 class AskAboutPartIn(BaseModel):
     part_name: str
-    user_question: str                              # determine which part the user is asking about, and what they want to know
+    user_question: str
 
-class AskAboutPartOut(BaseModel):                      # basically the schema for each endpoint
+class AskAboutPartOut(BaseModel):
     response_text: str
 
 class FindPartByFunctionIn(BaseModel):
@@ -12,3 +13,12 @@ class FindPartByFunctionIn(BaseModel):
 
 class FindPartByFunctionOut(BaseModel):
     part_name_to_highlight: str
+
+# --- New DTOs for the Audio Endpoint ---
+class AskAboutPartAudioIn(BaseModel):
+    part_name: str
+    audio_data: str # Base64 encoded WAV audio from Unity
+
+class AskAboutPartAudioOut(BaseModel):
+    response_text: str
+    audio_reply: str | None # Base64 encoded WAV audio from OpenAI TTS
