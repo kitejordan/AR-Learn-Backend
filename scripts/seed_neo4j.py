@@ -26,7 +26,9 @@ from neo4j import GraphDatabase
 
 def get_driver():
     load_dotenv()
-    uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+    uri = os.getenv("NEO4J_URI")
+    if not uri:
+        raise ValueError("NEO4J_URI not found in .env file!")
     user = os.getenv("NEO4J_USERNAME", "neo4j")
     pwd  = os.getenv("NEO4J_PASSWORD", "neo4j")
     return GraphDatabase.driver(uri, auth=(user, pwd))
@@ -93,7 +95,33 @@ PART_OF_MAP = {
     "Combustion Canister": "Combustion",
 }
 
-# (Intentionally no Functions and no extra Actions/Steps: keep to doc scope)
+FUNCTIONS = [
+    {"name": "Energy Extraction"},
+    {"name": "Flow Guidance"},
+    {"name": "Fuel Burning"},
+    {"name": "Structural Support"},
+    {"name": "Containment"},
+    {"name": "Gas Path Boundary"},
+    {"name": "Structural Mounting"},
+    {"name": "Fuel Transport"},
+    {"name": "Oil Transport"},
+    {"name": "Maintenance Access"},
+    {"name": "Fastening"},
+]
+
+PERFORMS_MAP = {
+    "Turbine Blades": ["Energy Extraction"],
+    "Turbine Dividers": ["Flow Guidance"],
+    "Combustion Canister": ["Fuel Burning"],
+    "Support Grid": ["Structural Support"],
+    "Turbine Casing (Outer)": ["Containment"],
+    "Turbine Casing (Inner)": ["Gas Path Boundary"],
+    "Turbine Casing (Mid)": ["Gas Path Boundary"],
+    "Engine Mount": ["Structural Mounting"],
+    "Fuel and Oil Lines": ["Fuel Transport", "Oil Transport"],
+    "Access Panel": ["Maintenance Access"],
+    "Fastening Screws": ["Fastening"],
+}
 
 # -------------------- seed routines --------------------
 
@@ -132,6 +160,33 @@ def seed_part_of(session, mapping: Dict[str, str]):
     res = session.execute_write(lambda tx: tx.run(q, rows=rows).single())
     print(f"[seed] PART_OF links created: {res['linked']}")
 
+def seed_functions(session, functions: List[Dict[str, Any]]):
+    q = """
+    UNWIND $rows AS row
+    MERGE (:Function {name: row.name})
+    RETURN count(*) AS upserted
+    """
+    res = session.execute_write(lambda tx: tx.run(q, rows=functions).single())
+    print(f"[seed] Functions upserted: {res['upserted']}")
+
+def seed_performs(session, mapping: Dict[str, List[str]]):
+    rows = []
+    for part, funcs in mapping.items():
+        for f in funcs:
+            rows.append({"part": part, "func": f})
+    if not rows:
+        print("[seed] No PERFORMS mappings provided.")
+        return
+    q = """
+    UNWIND $rows AS row
+    MATCH (p:Part {name: row.part})
+    MATCH (f:Function {name: row.func})
+    MERGE (p)-[:PERFORMS]->(f)
+    RETURN count(*) AS linked
+    """
+    res = session.execute_write(lambda tx: tx.run(q, rows=rows).single())
+    print(f"[seed] PERFORMS links created: {res['linked']}")
+
 # -------------------- main --------------------
 
 def main():
@@ -159,13 +214,20 @@ def main():
         print("[seed] Linking PART_OF (Combustion Canister → Combustion)…")
         seed_part_of(session, PART_OF_MAP)
 
+        print("[seed] Seeding functions…")
+        seed_functions(session, FUNCTIONS)
+
+        print("[seed] Linking PERFORMS (Part → Function)…")
+        seed_performs(session, PERFORMS_MAP)
+
         # quick counts
         counts = session.run("""
         CALL { MATCH (p:Part) RETURN count(p) AS parts }
         CALL { MATCH (pr:Process) RETURN count(pr) AS procs }
-        RETURN parts, procs
+        CALL { MATCH (f:Function) RETURN count(f) AS funcs }
+        RETURN parts, procs, funcs
         """).single()
-        print(f"[seed] Done. Parts={counts['parts']}  Processes={counts['procs']}")
+        print(f"[seed] Done. Parts={counts['parts']}  Processes={counts['procs']}  Functions={counts['funcs']}")
 
     driver.close()
 
