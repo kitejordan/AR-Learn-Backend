@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [V1.0.1]
+
+- Added GitHub Actions workflow (`.github/workflows/ping.yml`) to:
+  - Ping `/health` endpoint every 10 minutes to prevent backend cold starts
+  - Run on push and pull requests to all branches
+  - Provide detailed logs with response body and status code
+  - Fail the job if backend health check returns a non-200 status
+  
 ## [V1.0.0]
 
 - Project initialized with FastAPI backend structure
