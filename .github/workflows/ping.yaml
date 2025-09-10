@@ -1,18 +1,32 @@
 name: Keep Backend Alive
 
 on:
-    schedule:
-        # Runs every 10 minutes
-        - cron: "*/10 * * * *"
-    workflow_dispatch: # allow manual run
-    push:           # triggers on push to any branch
-        branches:
-            - '**'
+  schedule:
+    # Runs every 10 minutes
+    - cron: "*/10 * * * *"
+  workflow_dispatch: # allow manual run
+  push: # triggers on push to any branch
+    branches:
+      - "**"
+  pull_request: # triggers on PR to any branch
+    branches:
+      - "**"
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Curl ping
+      - name: Show timestamp
+        run: echo " Workflow started at $(date -u)"
+
+      - name: Ping backend health endpoint
         run: |
-          curl -s https://ar-learn-backend.onrender.com/health || true
+          echo "Pinging https://ar-learn-backend.onrender.com/health ..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" https://ar-learn-backend.onrender.com/health || true)
+          BODY=$(echo "$RESPONSE" | head -n 1)
+          STATUS=$(echo "$RESPONSE" | tail -n 1)
+          echo "Response body: $BODY"
+          echo "HTTP status code: $STATUS"
+
+      - name: Finish
+        run: echo "Backend ping completed at $(date -u)"
