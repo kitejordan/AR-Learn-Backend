@@ -21,12 +21,20 @@ jobs:
 
       - name: Ping backend health endpoint
         run: |
-          echo "Pinging https://ar-learn-backend.onrender.com/health ..."
-          RESPONSE=$(curl -s -w "\n%{http_code}" https://ar-learn-backend.onrender.com/health || true)
-          BODY=$(echo "$RESPONSE" | head -n 1)
-          STATUS=$(echo "$RESPONSE" | tail -n 1)
-          echo "Response body: $BODY"
-          echo "HTTP status code: $STATUS"
+            echo "Pinging https://ar-learn-backend.onrender.com/health ..."
+            RESPONSE=$(curl -s -w "\n%{http_code}" https://ar-learn-backend.onrender.com/health)
+            BODY=$(echo "$RESPONSE" | head -n 1)
+            STATUS=$(echo "$RESPONSE" | tail -n 1)
+
+            echo "Response body: $BODY"
+            echo "HTTP status code: $STATUS"
+
+            if [ "$STATUS" -ne 200 ]; then
+            echo "Backend health check failed"
+            exit 1
+            else
+            echo "Backend is healthy"
+            fi
 
       - name: Finish
         run: echo "Backend ping completed at $(date -u)"
