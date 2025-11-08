@@ -1,8 +1,10 @@
 from pydantic import BaseModel
 
-# --- Existing DTOs ---
 class AskAboutPartIn(BaseModel):
-    part_name: str
+    model_id: str | None = None
+    model_name: str | None = None
+    part_name: str | None = None
+    scene: str | None = None
     user_question: str
 
 class AskAboutPartOut(BaseModel):
@@ -14,11 +16,13 @@ class FindPartByFunctionIn(BaseModel):
 class FindPartByFunctionOut(BaseModel):
     part_name_to_highlight: str
 
-# --- New DTOs for the Audio Endpoint ---
 class AskAboutPartAudioIn(BaseModel):
-    part_name: str
-    audio_data: str # Base64 encoded WAV audio from Unity
+    model_id: str | None = None
+    model_name: str | None = None
+    part_name: str | None = None
+    scene: str | None = None
+    audio_data: str  # Base64 encoded WAV audio from Unity
 
 class AskAboutPartAudioOut(BaseModel):
     response_text: str
-    audio_reply: str | None # Base64 encoded WAV audio from OpenAI TTS
+    audio_reply: str | None  # Base64 encoded WAV audio from OpenAI TTS

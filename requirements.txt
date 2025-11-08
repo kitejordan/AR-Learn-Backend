@@ -37,5 +37,11 @@ typing-inspection==0.4.1
 typing_extensions==4.15.0
 urllib3==2.5.0
 uvicorn==0.35.0
-zstandard==0.24.0
 python-multipart==0.0.9
+
+# RAG doc parsing
+pypdf==5.1.0
+python-docx==1.1.2
+
+# PostgreSQL driver (binary wheel includes libpq)
+psycopg[binary]==3.2.1

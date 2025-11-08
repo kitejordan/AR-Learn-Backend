@@ -1,9 +1,8 @@
-
-
 from typing import Dict, Any, List
 from app.managers.graph_manager import GraphManager
 
-class ActionManager:                                           # Builds the final playbook (timeline) for Unity:
+
+class ActionManager:  # Builds the final playbook (timeline) for Unity:
     def __init__(self):
         self.graph = GraphManager()
 
