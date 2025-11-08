@@ -30,15 +30,18 @@ def insert_chunks(document_id: str, rows: List[Tuple[int|None, int|None, str, di
 def ann_search(
     question_embedding: List[float],
     n_results: int,
-    filters: Optional[Dict[str, str]] = None,
+    filters: Optional[Dict[str, Optional[str]]] = None,
 ) -> List[Dict]:
     """
     ANN search over doc_chunk.embedding with optional exact-match filters
     on meta JSONB (e.g. model_id, scene).
+    `filters` is a dict like {"model_id": "jet-engine-v1", "scene": "overview"}.
     """
     base = """
     WITH q AS (SELECT %s::vector AS emb)
-    SELECT id::text, text, meta,
+    SELECT id::text,
+           text,
+           meta,
            1 - (embedding <=> (SELECT emb FROM q)) AS score
     FROM doc_chunk
     WHERE 1=1
@@ -49,6 +52,7 @@ def ann_search(
         for key, value in filters.items():
             if value is None:
                 continue
+            # meta->>'key' = value
             base += " AND meta->>%s = %s"
             params.extend([key, value])
 
@@ -61,10 +65,11 @@ def ann_search(
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(base, params)
         rows = cur.fetchall()
-        return [
-            {"id": rid, "text": text, "meta": meta, "score": float(score)}
-            for (rid, text, meta, score) in rows
-        ]
+
+    return [
+        {"id": rid, "text": text, "meta": meta, "score": float(score)}
+        for (rid, text, meta, score) in rows
+    ]
 
 
 def delete_document(doc_id: str) -> int:
